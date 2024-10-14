@@ -1,1 +1,0 @@
-# Vector Field Uncertainty Visualization
