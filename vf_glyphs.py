@@ -1812,7 +1812,8 @@ def buildSquidGlyphNP(positions, min_vectors, median_vectors, max_vectors, domai
 
 
 def buildGlyphsForDash(data, scale=1.0, resolution=10, time_range =[0,0], selected_time= None, data_depth = 0.0,
-                        domain=None,  glyph_type='cone', mean_flag = False, compute_min_max_flag = False):
+                        domain=None,  glyph_type='cone', mean_flag = False, compute_min_max_flag = False, 
+                        mag_threshold = [-1.0, 1.0e+16]):
     """
     purpose: build glyphs for the given data
     input: data - pendas dataframe
@@ -1832,7 +1833,8 @@ def buildGlyphsForDash(data, scale=1.0, resolution=10, time_range =[0,0], select
     
     # start = time.time()
     if(compute_min_max_flag):
-        vf_statistics.getMinMedianMaxVectors(data, data_depth, time_range, domain, mean_flag)
+        print('Computing min, median and max vectors')
+        vf_statistics.getMinMedianMaxVectors(data, data_depth, time_range, domain, mean_flag, mag_threshold[0], mag_threshold[1])
     # end = time.time()
     # print("Time to compute min, median and max vectors:", end-start)
 

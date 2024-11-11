@@ -1043,7 +1043,7 @@ if(run_main_app):
     str_x_min_val = "{:.2f}".format(x_min_val)
     str_x_max_val = "{:.2f}".format(x_max_val)
     min_mag_val  = 0.0
-    max_mag_val = data['max_magnitude'][0]
+    max_mag_val = data['max_magnitude'][0] *1.2
     str_min_mag_val = "{:.2f}".format(min_mag_val)
     str_max_mag_val = "{:.2f}".format(max_mag_val)
     #
@@ -1066,6 +1066,7 @@ if(run_main_app):
         ],
         value=0
     )
+
     # view card
     view_card = dbc.Card([
         dbc.CardBody([
@@ -1561,24 +1562,21 @@ if(run_main_app):
 
         # gobal domain bounding box
         domain = data['domain'][0]
+
         
-        if(depth_threshold - data['selected_depth'][0] > 1e-4):
+        
+        if(depth_threshold - data['selected_depth'][0] > 1e-4 or 
+            'magnitude-threshold-slider-id' == ctx.triggered_id):
              comp_min_max_flag = True
              data['selected_depth'][0] = depth_threshold
         else:
             comp_min_max_flag = False
-        # if( global_view_radioitems_value == 0):
-        # print('glyph_type:', glyph_type)
+
         global_polygones = vf_glyphs.buildGlyphsForDash(data, scale=scale, resolution=10, time_range =time_range, 
                                                         selected_time = selected_time, data_depth = depth_threshold, 
-                                                        domain = domain, glyph_type=glyph_type, mean_flag= False, compute_min_max_flag= True)
+                                                        domain = domain, glyph_type=glyph_type, mean_flag= False, 
+                                                        compute_min_max_flag= True, mag_threshold=magnitude_threshold)
 
-        # elif(global_view_radioitems_value == 1):
-        #     global_polygones = vf_glyphs.buildGlyphsForDash(data, scale=scale, resolution=10, time_range =time_range, 
-        #                                                     selected_time = selected_time, data_depth = depth_threshold, 
-        #                                                     domain= domain, glyph_type='variability', mean_flag= False, compute_min_max_flag= True)
-
-        # if(local_view_radioitems_value == 0):
         if(box_selection):
             domain = np.array([[cx-dx*0.5, cx+dx*0.5], [cy-dy*0.5, cy+dy*0.5], [cz-dz*0.5, cz+dz*0.5]])
         else:
@@ -1586,28 +1584,12 @@ if(run_main_app):
 
         local_polygons = vf_glyphs.buildGlyphsForDash(data, scale=scale, resolution=10, time_range =time_range, 
                                                     selected_time= selected_time, data_depth = depth_threshold, 
-                                                    domain= domain, glyph_type=glyph_type, mean_flag= False, compute_min_max_flag= False)
-        # elif(local_view_radioitems_value == 1):
-        #     if(box_selection):
-        #         domain = np.array([[cx-dx*0.5, cx+dx*0.5], [cy-dy*0.5, cy+dy*0.5], [cz-dz*0.5, cz+dz*0.5]])
-        #     else:
-        #         domain = data['domain'][0]
-        #         # print('Here domain:', domain)
-        #     local_polygons = vf_glyphs.buildGlyphsForDash(data, scale=scale, resolution=10, time_range =time_range, 
-        #                                                   selected_time= selected_time, data_depth = depth_threshold, 
-        #                                                   domain= domain, glyph_type='variability', mean_flag= False, compute_min_max_flag= False)
+                                                    domain= domain, glyph_type=glyph_type, mean_flag= False, 
+                                                    compute_min_max_flag= False, mag_threshold=magnitude_threshold)
 
 
 
         if(box_selection):
-            # box = dash_vtk.GeometryRepresentation(
-            #     property={"edgeVisibility": True, "edgeColor":(0,0,0), "opacity": 0.5, "representation": 2},
-            #     actor={"position": (cx, cy, cz), "scale": (dx, dy, dz)},
-            #     children=[dash_vtk.Algorithm(id="box-selection-id", vtkClass="vtkCubeSource")],
-            # )
-            # global_polygones.append(box)
-            # global_polygones.append(domain_box)
-            # local_polygons.append(domain_box)
 
             box_points, box_polygons = vf_glyphs.getBoxPolyData(domain)
             box = dash_vtk.GeometryRepresentation(

@@ -1039,13 +1039,15 @@ def getMeanVectors(vectors, depths, depth_threshold):
 
 @njit
 def getMinMedianMaxVectors2(positions, vectors, vector_depths, depth_threshold, time_range, 
-                            domain, mean_flag = False):
+                            domain, mean_flag = False, mag_threshold_min = -1.0, mag_threshold_max = 1.0e+16):
     """
     purpose: compute the minimum, median, and maximum vectors
-    input:
+    input: positions: 3D s
     """
     
     # print('enter getMinMedianMaxVectors2() ...')
+    # print('mag_threshold_min =', mag_threshold_min, 'mag_threshold_max =', mag_threshold_max)
+
     # print('median_flag =', mean_flag)
     num_points = positions.shape[0]
     num_ensembles = vectors.shape[2]
@@ -1081,7 +1083,9 @@ def getMinMedianMaxVectors2(positions, vectors, vector_depths, depth_threshold, 
                     if(vector_depths[i_t][i_pt][i_m] >= depth_threshold):
                         # print('i_t =', i_t, 'i_pt =', i_pt, 'i_m =', i_m)
                         # print('vector_depths[', i_t, '][', i_pt, '][', i_m, '] =', vector_depths[i_t][i_pt][i_m])
-                        if(vectors[i_t][i_pt][i_m][0] < min_vectors[ii_t][i_pt][0]):
+                        if(vectors[i_t][i_pt][i_m][0] < min_vectors[ii_t][i_pt][0] and 
+                            vectors[i_t][i_pt][i_m][0] >= mag_threshold_min and vectors[i_t][i_pt][i_m][0] <= mag_threshold_max):
+                            # print('mag_threshold_min =', mag_threshold_min, 'vetor =', vectors[i_t][i_pt][i_m][0], 'mag_threshold_max =', mag_threshold_max)
                             min_vectors[ii_t][i_pt][0] = vectors[i_t][i_pt][i_m][0]
                         min_vectors[ii_t][i_pt][1] = 0.0
                         min_vectors[ii_t][i_pt][2] = 0.0
@@ -1105,11 +1109,13 @@ def getMinMedianMaxVectors2(positions, vectors, vector_depths, depth_threshold, 
                     # print('i_m =', i_m, 'i_t =', i_t, 'i_pt =', i_pt, 'depth_threshold =', depth_threshold)
                     # print('vector_depths[', i_t, '][', i_pt, '][', i_m, '] =', vector_depths[i_t][i_pt][i_m])
                     if(vector_depths[i_t][i_pt][i_m] >= depth_threshold):
-                        if(vectors[i_t][i_pt][i_m][0] > max_vectors[ii_t][i_pt][0]):
+                        if(vectors[i_t][i_pt][i_m][0] > max_vectors[ii_t][i_pt][0] and
+                            vectors[i_t][i_pt][i_m][0] >= mag_threshold_min and vectors[i_t][i_pt][i_m][0] <= mag_threshold_max):
                             max_vectors[ii_t][i_pt][0] = vectors[i_t][i_pt][i_m][0]
                     
                         for j_m in range(num_ensembles):
-                            if(vector_depths[i_t][i_pt][j_m] >= depth_threshold):
+                            if(vector_depths[i_t][i_pt][j_m] >= depth_threshold and 
+                                vectors[i_t][i_pt][j_m][0] >= mag_threshold_min and vectors[i_t][i_pt][j_m][0] <= mag_threshold_max):
                                 # print('i_m =', i_m, 'j_m =', j_m, 'i_t =', i_t, 'i_pt =', i_pt)
                                 sp_coord0 = vectors[i_t][i_pt][i_m]
                                 sp_coord1 = vectors[i_t][i_pt][j_m]
@@ -1174,7 +1180,7 @@ def getMinMedianMaxVectors2(positions, vectors, vector_depths, depth_threshold, 
     return min_vectors, median_vectors, max_vectors, variability
 
 
-def getMinMedianMaxVectors(data, depth_threshold, time_range, domain, mean_flag = False):
+def getMinMedianMaxVectors(data, depth_threshold, time_range, domain, mean_flag = False, mag_threshold_min = -1.0, mag_threshold_max = 1.0e+16):
     """
     purpose: compute the minimum, median, and maximum vectors
     input:
@@ -1192,7 +1198,7 @@ def getMinMedianMaxVectors(data, depth_threshold, time_range, domain, mean_flag 
                                                                                    data["depths"][0], 
                                                                                    depth_threshold, 
                                                                                    time_range, 
-                                                                                   domain, mean_flag)
+                                                                                   domain, mean_flag, mag_threshold_min, mag_threshold_max)
     data["min_vectors"][0][time_range[0]:time_range[1]+1] = tmp_min_vectors
     data["median_vectors"][0][time_range[0]:time_range[1]+1] = tmp_median_vectors
     data["max_vectors"][0][time_range[0]:time_range[1]+1] = tmp_max_vectors
